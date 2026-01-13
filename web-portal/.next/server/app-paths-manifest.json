@@ -1,10 +1,10 @@
 {
-  "/not-found": "app/not-found.js",
-  "/api/cameras/[id]/test-stream/route": "app/api/cameras/[id]/test-stream/route.js",
-  "/api/cameras/route": "app/api/cameras/route.js",
+  "/api/images/route": "app/api/images/route.js",
+  "/api/classrooms/route": "app/api/classrooms/route.js",
+  "/api/schedules/route": "app/api/schedules/route.js",
+  "/api/leaderboard/route": "app/api/leaderboard/route.js",
   "/dashboard/images/page": "app/dashboard/images/page.js",
   "/dashboard/images/[id]/page": "app/dashboard/images/[id]/page.js",
   "/dashboard/leaderboard/page": "app/dashboard/leaderboard/page.js",
-  "/dashboard/cameras/page": "app/dashboard/cameras/page.js",
-  "/dashboard/cameras/create/page": "app/dashboard/cameras/create/page.js"
+  "/dashboard/schedules/page": "app/dashboard/schedules/page.js"
 }

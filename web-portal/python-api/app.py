@@ -7,6 +7,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
 import os
+import cv2
+from datetime import datetime
 
 # Add parent directory (CLEANLENESS) to path to import main
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -97,6 +99,80 @@ def analyze_image():
                 'error': 'Analysis failed'
             }), 500
         
+        # Debug: Check what's in result
+        print(f"DEBUG: Result keys: {result.keys()}")
+        print(f"DEBUG: Has annotated_image: {'annotated_image' in result}")
+        if 'annotated_image' in result:
+            print(f"DEBUG: annotated_image is None: {result['annotated_image'] is None}")
+            if result['annotated_image'] is not None:
+                print(f"DEBUG: annotated_image shape: {result['annotated_image'].shape}")
+        
+        # Save annotated image with detections drawn by OpenCV
+        annotated_image_path = None
+        if 'annotated_image' in result and result['annotated_image'] is not None:
+            try:
+                # Parse original image path to extract Grade/Section structure
+                # Expected format: uploads/Grade-X/Section-Y/image.jpg
+                path_parts = image_path.replace('\\', '/').split('/')
+                
+                # Find Grade and Section folders
+                grade_folder = None
+                section_folder = None
+                for i, part in enumerate(path_parts):
+                    if part.startswith('Grade-'):
+                        grade_folder = part
+                        if i + 1 < len(path_parts) and path_parts[i + 1].startswith('Section-'):
+                            section_folder = path_parts[i + 1]
+                        break
+                
+                # Get original filename
+                original_filename = os.path.basename(image_path)
+                name_without_ext = os.path.splitext(original_filename)[0]
+                
+                # Create date folder (YYYY-MM-DD format)
+                date_folder = datetime.now().strftime('%Y-%m-%d')
+                
+                # Create annotated filename with time only (since date is in folder)
+                time_str = datetime.now().strftime('%H-%M-%S')
+                annotated_filename = f"annotated_{time_str}.jpg"
+                
+                # Build organized path: Grade-X/Section-Y/YYYY-MM-DD/annotated_HH-MM-SS.jpg
+                if grade_folder and section_folder:
+                    relative_path = os.path.join(grade_folder, section_folder, date_folder, annotated_filename)
+                else:
+                    # Fallback: just use date folder
+                    relative_path = os.path.join(date_folder, annotated_filename)
+                
+                # Full path for saving
+                web_portal_path = os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    'public', 'uploads', relative_path
+                )
+                
+                print(f"DEBUG: Organized path: {relative_path}")
+                print(f"DEBUG: Saving to: {web_portal_path}")
+                
+                # Ensure directory exists
+                os.makedirs(os.path.dirname(web_portal_path), exist_ok=True)
+                
+                # Save annotated image
+                success = cv2.imwrite(web_portal_path, result['annotated_image'])
+                
+                if success:
+                    # Return relative path for web access (with forward slashes)
+                    annotated_image_path = relative_path.replace('\\', '/')
+                    print(f"✓ Saved annotated image: {annotated_image_path}")
+                else:
+                    print(f"✗ Failed to save annotated image with cv2.imwrite")
+                
+            except Exception as e:
+                print(f"Warning: Could not save annotated image: {e}")
+                import traceback
+                traceback.print_exc()
+                # Continue without annotated image
+        else:
+            print("DEBUG: No annotated_image in result or it is None")
+        
         # Format response
         response = {
             'success': True,
@@ -104,10 +180,12 @@ def analyze_image():
             'total_score': result['total_score'],
             'rating': result['rating'],
             'detections': result.get('detections', []),
+            'annotated_image_path': annotated_image_path,  # NEW: Path to annotated image
             'classroom_id': classroom_id
         }
         
         print(f"✓ Analysis complete: {result['total_score']}/50 ({result['rating']})")
+        print(f"DEBUG: Returning annotated_image_path: {annotated_image_path}")
         
         return jsonify(response)
         

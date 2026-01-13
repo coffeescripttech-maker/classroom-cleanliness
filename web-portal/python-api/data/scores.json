@@ -1,0 +1,288 @@
+[
+  {
+    "classroom_id": "Room 401",
+    "timestamp": "2026-01-12T10:01:55.234059",
+    "scores": {
+      "floor": 5.0,
+      "furniture": 8.34,
+      "trash": 7.0,
+      "wall": 2.2,
+      "clutter": 10
+    },
+    "total_score": 32.54073135355855,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 301",
+    "timestamp": "2026-01-12T10:02:40.263740",
+    "scores": {
+      "floor": 7.82,
+      "furniture": 8.21,
+      "trash": 7.0,
+      "wall": 2.17,
+      "clutter": 10
+    },
+    "total_score": 35.19740215019348,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 201",
+    "timestamp": "2026-01-12T10:03:31.907168",
+    "scores": {
+      "floor": 7.04,
+      "furniture": 7.0,
+      "trash": 7.0,
+      "wall": 1.5,
+      "clutter": 10
+    },
+    "total_score": 32.535976119702376,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 301",
+    "timestamp": "2026-01-12T10:06:24.439799",
+    "scores": {
+      "floor": 5.0,
+      "furniture": 8.34,
+      "trash": 7.0,
+      "wall": 2.2,
+      "clutter": 10
+    },
+    "total_score": 32.54073135355855,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-12T10:13:48.952034",
+    "scores": {
+      "floor": 5.0,
+      "furniture": 8.34,
+      "trash": 7.0,
+      "wall": 2.2,
+      "clutter": 10
+    },
+    "total_score": 32.54073135355855,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-12T10:13:57.747262",
+    "scores": {
+      "floor": 5.0,
+      "furniture": 8.34,
+      "trash": 7.0,
+      "wall": 2.2,
+      "clutter": 10
+    },
+    "total_score": 32.54073135355855,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-12T10:14:52.127112",
+    "scores": {
+      "floor": 5.0,
+      "furniture": 8.34,
+      "trash": 7.0,
+      "wall": 2.2,
+      "clutter": 10
+    },
+    "total_score": 32.54073135355855,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-12T10:16:42.524455",
+    "scores": {
+      "floor": 5.0,
+      "furniture": 8.34,
+      "trash": 7.0,
+      "wall": 2.2,
+      "clutter": 10
+    },
+    "total_score": 32.54073135355855,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 401",
+    "timestamp": "2026-01-12T10:22:13.297054",
+    "scores": {
+      "floor": 7.16,
+      "furniture": 8.79,
+      "trash": 7.0,
+      "wall": 4.86,
+      "clutter": 10
+    },
+    "total_score": 37.81194800281773,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-12T14:40:17.759252",
+    "scores": {
+      "floor": 7.46,
+      "furniture": 7.88,
+      "trash": 7.0,
+      "wall": 4.94,
+      "clutter": 10
+    },
+    "total_score": 37.285801535608485,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-12T14:40:53.951590",
+    "scores": {
+      "floor": 7.04,
+      "furniture": 8.92,
+      "trash": 7.0,
+      "wall": 2.34,
+      "clutter": 10
+    },
+    "total_score": 35.3020238988108,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 201",
+    "timestamp": "2026-01-12T14:41:28.700717",
+    "scores": {
+      "floor": 7.82,
+      "furniture": 9.69,
+      "trash": 7.0,
+      "wall": 4.19,
+      "clutter": 10
+    },
+    "total_score": 38.69854290686417,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 301",
+    "timestamp": "2026-01-12T14:42:16.250958",
+    "scores": {
+      "floor": 7.82,
+      "furniture": 8.07,
+      "trash": 7.0,
+      "wall": 1.6,
+      "clutter": 10
+    },
+    "total_score": 34.49610728674395,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 401",
+    "timestamp": "2026-01-12T14:42:50.311586",
+    "scores": {
+      "floor": 7.52,
+      "furniture": 9.03,
+      "trash": 7.0,
+      "wall": 2.38,
+      "clutter": 10
+    },
+    "total_score": 35.9278822964673,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 401",
+    "timestamp": "2026-01-12T14:43:16.504443",
+    "scores": {
+      "floor": 6.98,
+      "furniture": 8.84,
+      "trash": 7.0,
+      "wall": 3.0,
+      "clutter": 10
+    },
+    "total_score": 35.819506499864936,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-13T09:22:56.529758",
+    "scores": {
+      "floor": 7.16,
+      "furniture": 8.79,
+      "trash": 7.0,
+      "wall": 4.86,
+      "clutter": 10
+    },
+    "total_score": 37.81194800281773,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-13T09:32:05.311086",
+    "scores": {
+      "floor": 7.04,
+      "furniture": 8.92,
+      "trash": 7.0,
+      "wall": 2.34,
+      "clutter": 10
+    },
+    "total_score": 35.3020238988108,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-13T09:36:19.226517",
+    "scores": {
+      "floor": 7.04,
+      "furniture": 8.92,
+      "trash": 7.0,
+      "wall": 2.34,
+      "clutter": 10
+    },
+    "total_score": 35.3020238988108,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-13T09:36:42.955906",
+    "scores": {
+      "floor": 7.64,
+      "furniture": 8.0,
+      "trash": 7.0,
+      "wall": 3.77,
+      "clutter": 10
+    },
+    "total_score": 36.41197265625,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 201",
+    "timestamp": "2026-01-13T09:37:51.040807",
+    "scores": {
+      "floor": 7.82,
+      "furniture": 9.69,
+      "trash": 7.0,
+      "wall": 4.19,
+      "clutter": 10
+    },
+    "total_score": 38.69854290686417,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 201",
+    "timestamp": "2026-01-13T09:38:24.561799",
+    "scores": {
+      "floor": 7.82,
+      "furniture": 8.07,
+      "trash": 7.0,
+      "wall": 1.6,
+      "clutter": 10
+    },
+    "total_score": 34.49610728674395,
+    "rating": "Fair"
+  },
+  {
+    "classroom_id": "Room 301",
+    "timestamp": "2026-01-13T09:38:55.735209",
+    "scores": {
+      "floor": 7.46,
+      "furniture": 7.88,
+      "trash": 7.0,
+      "wall": 4.94,
+      "clutter": 10
+    },
+    "total_score": 37.285801535608485,
+    "rating": "Good"
+  }
+]

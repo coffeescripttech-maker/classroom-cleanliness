@@ -26,6 +26,7 @@ interface ImageDetail {
     total_score: number;
     rating: string;
     detected_objects: any;
+    annotated_image_path?: string;  // NEW: Path to annotated image
     analyzed_at: string;
   };
 }
@@ -173,13 +174,34 @@ export default function ImageDetailPage() {
                   />
                 </div>
                 
-                {/* Detected Objects */}
+                {/* Detected Objects - Use annotated image if available, otherwise draw on canvas */}
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">Detected Objects</p>
-                  <DetectedObjectsCanvas
-                    imagePath={`/uploads/${image.image_path}`}
-                    detections={image.score.detected_objects}
-                  />
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Detected Objects 
+                    {image.score.annotated_image_path && (
+                      <span className="ml-2 text-xs text-green-600">✓ OpenCV Rendered</span>
+                    )}
+                  </p>
+                  {image.score.annotated_image_path ? (
+                    // Use pre-rendered annotated image from Python/OpenCV
+                    <img
+                      src={`/uploads/${image.score.annotated_image_path}`}
+                      alt="Detected Objects"
+                      className="w-full rounded-lg border border-gray-300"
+                      onError={(e) => {
+                        // Fallback to canvas drawing if annotated image fails to load
+                        console.warn('Annotated image failed to load, falling back to canvas');
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        // Show canvas fallback
+                      }}
+                    />
+                  ) : (
+                    // Fallback to canvas drawing (old method)
+                    <DetectedObjectsCanvas
+                      imagePath={`/uploads/${image.image_path}`}
+                      detections={image.score.detected_objects}
+                    />
+                  )}
                 </div>
               </div>
             </div>

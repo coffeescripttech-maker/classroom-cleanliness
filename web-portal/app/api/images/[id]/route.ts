@@ -21,6 +21,7 @@ export async function GET(
         cs.total_score,
         cs.rating,
         cs.detected_objects,
+        cs.annotated_image_path,
         cs.analyzed_at
       FROM captured_images ci
       LEFT JOIN classrooms c ON ci.classroom_id = c.id
@@ -51,6 +52,7 @@ export async function GET(
         total_score: image.total_score,
         rating: image.rating,
         detected_objects: image.detected_objects,
+        annotated_image_path: image.annotated_image_path,
         analyzed_at: image.analyzed_at
       } : null
     };

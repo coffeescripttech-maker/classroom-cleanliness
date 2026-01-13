@@ -35,14 +35,16 @@ export async function POST(request: NextRequest) {
 
     const classroom = classrooms[0];
     
-    // Create folder structure: Grade-X/Section-Y/
+    // Create folder structure: Grade-X/Section-Y/YYYY-MM-DD/
     const gradeFolder = classroom.grade_level.replace(/\s+/g, '-');
     const sectionFolder = classroom.section_name.replace(/\s+/g, '-');
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T');
-    const filename = `${timestamp[0]}_${timestamp[1].split('-')[0]}.jpg`;
+    const now = new Date();
+    const dateFolder = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+    const filename = `original_${timeStr}.jpg`;
     
-    const relativePath = `${gradeFolder}/${sectionFolder}/${filename}`;
-    const uploadDir = join(process.cwd(), 'public', 'uploads', gradeFolder, sectionFolder);
+    const relativePath = `${gradeFolder}/${sectionFolder}/${dateFolder}/${filename}`;
+    const uploadDir = join(process.cwd(), 'public', 'uploads', gradeFolder, sectionFolder, dateFolder);
     const filePath = join(uploadDir, filename);
 
     // Create directories if they don't exist

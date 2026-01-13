@@ -11,6 +11,26 @@ Web-based admin portal for managing classroom cleanliness monitoring system.
 
 ## Quick Start
 
+### Option 1: Automated Startup (Recommended)
+
+From project root directory:
+
+**Windows Batch:**
+```bash
+cd ..
+start-servers.bat
+```
+
+**PowerShell:**
+```bash
+cd ..
+.\start-servers.ps1
+```
+
+This will automatically start both Python API and Next.js servers.
+
+### Option 2: Manual Startup
+
 ### 1. Install Dependencies
 
 ```bash

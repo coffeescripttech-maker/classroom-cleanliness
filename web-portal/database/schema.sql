@@ -128,6 +128,7 @@ CREATE TABLE cleanliness_scores (
   total_score DECIMAL(5,2) DEFAULT 0,
   rating ENUM('Excellent', 'Good', 'Fair', 'Poor') NOT NULL,
   detected_objects JSON,
+  annotated_image_path VARCHAR(255) NULL,
   analysis_details JSON,
   analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (image_id) REFERENCES captured_images(id) ON DELETE CASCADE,

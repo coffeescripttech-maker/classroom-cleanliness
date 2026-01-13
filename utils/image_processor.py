@@ -11,12 +11,27 @@ class ImageProcessor:
     def load_image(self, image_path):
         """Load image from file path"""
         try:
-            image = cv2.imread(image_path)
+            # Normalize path for Windows compatibility
+            import os
+            normalized_path = os.path.normpath(image_path)
+            
+            # Check if file exists
+            if not os.path.exists(normalized_path):
+                raise ValueError(f"Image file not found: {normalized_path}")
+            
+            # Use cv2.imdecode with numpy for better path handling
+            import numpy as np
+            with open(normalized_path, 'rb') as f:
+                file_bytes = np.asarray(bytearray(f.read()), dtype=np.uint8)
+                image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+            
             if image is None:
-                raise ValueError(f"Could not load image from {image_path}")
+                raise ValueError(f"Could not decode image from {normalized_path}")
             return image
         except Exception as e:
             print(f"Error loading image: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def preprocess(self, image):
