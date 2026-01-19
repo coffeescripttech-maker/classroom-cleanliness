@@ -15,7 +15,7 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 Write-Host "Installing required packages..." -ForegroundColor Yellow
-pip install mysql-connector-python requests opencv-python
+pip install -r requirements_schedule.txt
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

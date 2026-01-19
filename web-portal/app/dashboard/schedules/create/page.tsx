@@ -18,7 +18,7 @@ export default function CreateSchedulePage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    camera_id: '',
+    camera_ids: [] as number[], // Changed to array for multi-select
     capture_time: '08:00',
     days_of_week: ['1', '2', '3', '4', '5'], // Mon-Fri default
     alarm_enabled: true,
@@ -36,7 +36,9 @@ export default function CreateSchedulePage() {
     try {
       const response = await fetch('/api/cameras');
       const result = await response.json();
-      setCameras(result.data || []);
+      // API returns array directly, not wrapped in {data: [...]}
+      const camerasData = Array.isArray(result) ? result : (result.data || []);
+      setCameras(camerasData);
     } catch (error) {
       console.error('Failed to fetch cameras:', error);
     }
@@ -47,27 +49,42 @@ export default function CreateSchedulePage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/schedules', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          camera_id: parseInt(formData.camera_id),
-          days_of_week: formData.days_of_week.join(',')
+      // Create a schedule for each selected camera
+      const promises = formData.camera_ids.map(camera_id =>
+        fetch('/api/schedules', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...formData,
+            camera_id,
+            days_of_week: formData.days_of_week.join(',')
+          })
         })
-      });
+      );
 
-      if (response.ok) {
+      const results = await Promise.all(promises);
+      const allSuccessful = results.every(r => r.ok);
+
+      if (allSuccessful) {
         router.push('/dashboard/schedules');
       } else {
-        alert('Failed to create schedule');
+        alert('Some schedules failed to create');
       }
     } catch (error) {
-      console.error('Failed to create schedule:', error);
-      alert('Failed to create schedule');
+      console.error('Failed to create schedules:', error);
+      alert('Failed to create schedules');
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleCamera = (cameraId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      camera_ids: prev.camera_ids.includes(cameraId)
+        ? prev.camera_ids.filter(id => id !== cameraId)
+        : [...prev.camera_ids, cameraId]
+    }));
   };
 
   const toggleDay = (day: string) => {
@@ -98,7 +115,7 @@ export default function CreateSchedulePage() {
           className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Schedules
+          Back to Schedule
         </Link>
         <h1 className="text-3xl font-bold text-gray-900">Create Schedule</h1>
         <p className="text-gray-600 mt-1">Set up automated classroom image captures</p>
@@ -125,26 +142,45 @@ export default function CreateSchedulePage() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Camera className="w-4 h-4 inline mr-1" />
-            Camera *
+            Cameras * (Select one or more)
           </label>
-          <select
-            required
-            value={formData.camera_id}
-            onChange={(e) => setFormData({ ...formData, camera_id: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Select a camera</option>
-            {cameras.filter(c => c.status === 'active').map((camera) => (
-              <option key={camera.id} value={camera.id}>
-                {camera.name} - {camera.classroom_name}
-              </option>
-            ))}
-          </select>
-          {cameras.filter(c => c.status === 'active').length === 0 && (
-            <p className="text-sm text-red-600 mt-1">
-              No active cameras available. Please add a camera first.
+          <div className="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
+            {cameras.filter(c => c.status === 'active').length === 0 ? (
+              <p className="text-sm text-red-600">
+                No active cameras available. Please add a camera first.
+              </p>
+            ) : (
+              cameras.filter(c => c.status === 'active').map((camera) => (
+                <label
+                  key={camera.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                    formData.camera_ids.includes(camera.id)
+                      ? 'bg-blue-50 border-blue-500'
+                      : 'bg-white border-gray-200 hover:border-blue-300'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.camera_ids.includes(camera.id)}
+                    onChange={() => toggleCamera(camera.id)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">{camera.name}</div>
+                    <div className="text-sm text-gray-600">{camera.classroom_name}</div>
+                  </div>
+                </label>
+              ))
+            )}
+          </div>
+          {formData.camera_ids.length > 0 && (
+            <p className="text-sm text-green-600 mt-2">
+              ✓ {formData.camera_ids.length} camera{formData.camera_ids.length > 1 ? 's' : ''} selected
             </p>
           )}
+          <p className="text-sm text-gray-500 mt-2">
+            💡 Tip: Select multiple cameras to apply the same schedule to all of them
+          </p>
         </div>
 
         {/* Capture Time */}
@@ -239,12 +275,12 @@ export default function CreateSchedulePage() {
         <div className="border-t pt-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             <Timer className="w-5 h-5 inline mr-2" />
-            Pre-Capture Delay
+            Cleanup Time (Before Capture)
           </h3>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Delay (seconds)
+              Cleanup Duration (seconds)
             </label>
             <input
               type="number"
@@ -256,8 +292,18 @@ export default function CreateSchedulePage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <p className="text-sm text-gray-500 mt-1">
-              Time given to students to clean before capture ({Math.floor(formData.pre_capture_delay_seconds / 60)} minutes)
+              Time given to students to clean BEFORE capture ({Math.floor(formData.pre_capture_delay_seconds / 60)} minutes)
             </p>
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Timeline Example:</strong> If capture time is 1:00 PM with 5 min cleanup:
+              </p>
+              <ul className="text-sm text-blue-700 mt-2 space-y-1 ml-4">
+                <li>• <strong>12:55 PM</strong> - Alarm plays (warning)</li>
+                <li>• <strong>12:55-1:00 PM</strong> - Students clean up (5 minutes)</li>
+                <li>• <strong>1:00 PM</strong> - Image captured at scheduled time</li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -281,10 +327,10 @@ export default function CreateSchedulePage() {
         <div className="flex gap-3 pt-6 border-t">
           <button
             type="submit"
-            disabled={loading || formData.days_of_week.length === 0}
+            disabled={loading || formData.days_of_week.length === 0 || formData.camera_ids.length === 0}
             className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
           >
-            {loading ? 'Creating...' : 'Create Schedule'}
+            {loading ? 'Creating...' : `Create Schedule${formData.camera_ids.length > 1 ? 's' : ''} (${formData.camera_ids.length})`}
           </button>
           <Link
             href="/dashboard/schedules"

@@ -13,6 +13,8 @@ interface ImageDetail {
   section_name: string;
   building: string;
   image_path: string;
+  blurred_image_path?: string;  // NEW: Blurred image path
+  faces_detected?: number;       // NEW: Number of faces detected
   captured_at: string;
   file_size: number;
   width: number;
@@ -26,7 +28,8 @@ interface ImageDetail {
     total_score: number;
     rating: string;
     detected_objects: any;
-    annotated_image_path?: string;  // NEW: Path to annotated image
+    annotated_image_path?: string;
+    faces_blurred?: boolean;     // NEW: Whether faces were blurred
     analyzed_at: string;
   };
 }
@@ -40,6 +43,7 @@ export default function ImageDetailPage() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState<string | null>(null);
+  const [showBlurred, setShowBlurred] = useState(true);
 
   useEffect(() => {
     fetchImage();
@@ -159,19 +163,50 @@ export default function ImageDetailPage() {
           {/* Image Comparison */}
           {image.score && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h2 className="text-lg font-semibold mb-4">Image Comparison</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Image Comparison</h2>
+                
+                {/* Face Blur Toggle */}
+                {image.blurred_image_path && image.faces_detected && image.faces_detected > 0 && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600">
+                      {image.faces_detected} face{image.faces_detected > 1 ? 's' : ''} detected
+                    </span>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <span className="text-sm font-medium text-gray-700">Blur Faces</span>
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={showBlurred}
+                          onChange={(e) => setShowBlurred(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </div>
+                    </label>
+                  </div>
+                )}
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Original Image */}
+                {/* Original/Blurred Image */}
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">Original Image</p>
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    {showBlurred && image.blurred_image_path ? 'Blurred Image (Privacy Protected)' : 'Original Image'}
+                  </p>
                   <img
-                    src={`/uploads/${image.image_path}`}
-                    alt="Original"
+                    src={`/uploads/${showBlurred && image.blurred_image_path ? image.blurred_image_path : image.image_path}`}
+                    alt={showBlurred ? "Blurred" : "Original"}
                     className="w-full rounded-lg border border-gray-300"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/placeholder-image.png';
                     }}
                   />
+                  {showBlurred && image.blurred_image_path && (
+                    <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                      <span className="text-green-600">✓</span> Faces automatically blurred for privacy
+                    </p>
+                  )}
                 </div>
                 
                 {/* Detected Objects - Use annotated image if available, otherwise draw on canvas */}
@@ -210,14 +245,41 @@ export default function ImageDetailPage() {
           {/* Single Image (if not analyzed) */}
           {!image.score && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              {/* Face Blur Toggle for unanalyzed images */}
+              {image.blurred_image_path && image.faces_detected && image.faces_detected > 0 && (
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm text-gray-600">
+                    {image.faces_detected} face{image.faces_detected > 1 ? 's' : ''} detected
+                  </span>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-sm font-medium text-gray-700">Blur Faces</span>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={showBlurred}
+                        onChange={(e) => setShowBlurred(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </div>
+                  </label>
+                </div>
+              )}
+              
               <img
-                src={`/uploads/${image.image_path}`}
+                src={`/uploads/${showBlurred && image.blurred_image_path ? image.blurred_image_path : image.image_path}`}
                 alt={image.classroom_name}
                 className="w-full rounded-lg"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/placeholder-image.png';
                 }}
               />
+              
+              {showBlurred && image.blurred_image_path && (
+                <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                  <span className="text-green-600">✓</span> Faces automatically blurred for privacy
+                </p>
+              )}
             </div>
           )}
 
@@ -335,6 +397,24 @@ export default function ImageDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Face Detection Info */}
+            {image.faces_detected !== undefined && (
+              <div className="pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Faces Detected</span>
+                  <span className={`text-sm font-semibold ${image.faces_detected > 0 ? 'text-blue-600' : 'text-gray-500'}`}>
+                    {image.faces_detected}
+                  </span>
+                </div>
+                {image.blurred_image_path && image.faces_detected > 0 && (
+                  <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                    <span>✓</span>
+                    <span>Blurred version available</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* File Details */}

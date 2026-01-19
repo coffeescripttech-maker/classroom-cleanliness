@@ -1,0 +1,7 @@
+# Schedule Checker Requirements
+# Install with: pip install -r requirements_schedule.txt
+
+mysql-connector-python>=8.0.0
+requests>=2.31.0
+opencv-python>=4.8.0
+pygame>=2.5.0

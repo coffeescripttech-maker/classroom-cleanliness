@@ -70,6 +70,23 @@ def test_rtsp_connection(rtsp_url, timeout=10):
             'error': f'Exception during RTSP test: {str(e)}'
         }
 
+def capture_frame_from_rtsp(rtsp_url, output_path, timeout=10):
+    """
+    Capture a single frame from RTSP stream and save to file
+    Simple wrapper for schedule_checker compatibility
+    
+    Args:
+        rtsp_url: Full RTSP URL
+        output_path: Path to save the captured image
+        timeout: Connection timeout in seconds
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    result = capture_frame(rtsp_url, output_path, timeout)
+    return result['success']
+
+
 def capture_frame(rtsp_url, output_path, timeout=10):
     """
     Capture a single frame from RTSP stream and save to file

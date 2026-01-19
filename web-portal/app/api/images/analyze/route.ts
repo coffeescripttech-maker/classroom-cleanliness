@@ -74,9 +74,14 @@ export async function POST(request: NextRequest) {
     const totalScore = aiResult.total_score ?? 0;
     const rating = aiResult.rating || 'N/A';
     const detections = JSON.stringify(aiResult.detections || []);
-    const annotatedImagePath = aiResult.annotated_image_path || null;  // NEW: Get annotated image path
+    const annotatedImagePath = aiResult.annotated_image_path || null;
+    const blurredImagePath = aiResult.blurred_image_path || null;  // NEW: Blurred image
+    const facesDetected = aiResult.faces_detected ?? 0;             // NEW: Face count
+    const faceLocations = JSON.stringify(aiResult.face_locations || []);  // NEW: Face locations
 
     console.log('DEBUG: annotatedImagePath variable:', annotatedImagePath);
+    console.log('DEBUG: blurredImagePath variable:', blurredImagePath);
+    console.log('DEBUG: facesDetected:', facesDetected);
     console.log('Storing scores:', {
       image_id,
       classroom_id: image.classroom_id,
@@ -87,15 +92,25 @@ export async function POST(request: NextRequest) {
       clutterScore,
       totalScore,
       rating,
-      annotatedImagePath
+      annotatedImagePath,
+      blurredImagePath,
+      facesDetected
     });
+
+    // Update captured_images with face blur info
+    await query(
+      `UPDATE captured_images 
+       SET blurred_image_path = ?, faces_detected = ?, face_locations = ?
+       WHERE id = ?`,
+      [blurredImagePath, facesDetected, faceLocations, image_id]
+    );
 
     // Store scores in database
     await query(
       `INSERT INTO cleanliness_scores 
        (image_id, classroom_id, floor_score, furniture_score, trash_score, 
-        wall_score, clutter_score, total_score, rating, detected_objects, annotated_image_path, analyzed_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        wall_score, clutter_score, total_score, rating, detected_objects, annotated_image_path, faces_blurred, analyzed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         image_id,
         image.classroom_id,
@@ -107,7 +122,8 @@ export async function POST(request: NextRequest) {
         totalScore,
         rating,
         detections,
-        annotatedImagePath  // NEW: Store annotated image path
+        annotatedImagePath,
+        facesDetected > 0  // NEW: Mark if faces were blurred
       ]
     );
 

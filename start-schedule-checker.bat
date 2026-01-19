@@ -16,7 +16,7 @@ if errorlevel 1 (
 
 echo.
 echo Installing required packages...
-pip install mysql-connector-python requests opencv-python
+pip install -r requirements_schedule.txt
 
 echo.
 echo ========================================

@@ -24,6 +24,8 @@ export default function CamerasPage() {
   const [loading, setLoading] = useState(true);
   const [testingCamera, setTestingCamera] = useState<number | null>(null);
   const [testingStream, setTestingStream] = useState<number | null>(null);
+  const [streamingCamera, setStreamingCamera] = useState<CameraDevice | null>(null);
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCameras();
@@ -91,6 +93,42 @@ export default function CamerasPage() {
     } finally {
       setTestingStream(null);
     }
+  };
+
+  const handleViewStream = async (camera: CameraDevice) => {
+    try {
+      const response = await fetch(`/api/cameras/${camera.id}/stream`);
+      const result = await response.json();
+      
+      if (result.success) {
+        setStreamingCamera(camera);
+        setStreamUrl(result.data.streamUrl);
+        
+        // Test if stream URL is accessible
+        console.log('Stream URL:', result.data.streamUrl);
+        
+        // Try to fetch the stream to see if it's working
+        fetch(result.data.streamUrl)
+          .then(r => {
+            console.log('Stream response status:', r.status);
+            console.log('Stream response headers:', r.headers);
+            if (!r.ok) {
+              console.error('Stream not accessible:', r.statusText);
+            }
+          })
+          .catch(e => console.error('Stream fetch error:', e));
+      } else {
+        alert('Failed to get stream URL: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Failed to get stream:', error);
+      alert('Failed to start stream. Check console for details.');
+    }
+  };
+
+  const closeStream = () => {
+    setStreamingCamera(null);
+    setStreamUrl(null);
   };
 
   const getStatusIcon = (status: string) => {
@@ -245,13 +283,13 @@ export default function CamerasPage() {
                 {testingCamera === camera.id ? 'Testing...' : 'Config'}
               </button>
               <button
-                onClick={() => handleTestStream(camera.id)}
+                onClick={() => handleViewStream(camera)}
                 disabled={testingCamera === camera.id || testingStream === camera.id}
                 className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
-                title="Test actual RTSP stream (requires OpenCV)"
+                title="View live RTSP stream"
               >
                 <Play className="w-4 h-4" />
-                {testingStream === camera.id ? 'Testing...' : 'Stream'}
+                Stream
               </button>
               <Link
                 href={`/dashboard/cameras/${camera.id}/edit`}
@@ -284,6 +322,98 @@ export default function CamerasPage() {
             <Plus className="w-5 h-5" />
             Add Camera
           </Link>
+        </div>
+      )}
+
+      {/* Live Stream Modal */}
+      {streamingCamera && streamUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Live Stream</h2>
+                <p className="text-gray-600">{streamingCamera.name} - {streamingCamera.classroom_name}</p>
+              </div>
+              <button
+                onClick={closeStream}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="bg-black rounded-lg overflow-hidden relative">
+                <img
+                  src={streamUrl}
+                  alt="Live camera stream"
+                  className="w-full h-auto"
+                  onError={(e) => {
+                    console.error('Stream image load error');
+                    console.error('Stream URL was:', streamUrl);
+                    e.currentTarget.style.display = 'none';
+                    const errorDiv = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (errorDiv) errorDiv.style.display = 'flex';
+                  }}
+                  onLoad={() => {
+                    console.log('Stream loaded successfully!');
+                  }}
+                />
+                <div 
+                  style={{ display: 'none' }}
+                  className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white p-8"
+                >
+                  <div className="text-center">
+                    <svg className="w-16 h-16 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 className="text-xl font-bold mb-2">Stream Unavailable</h3>
+                    <p className="text-gray-400 mb-4">Unable to connect to camera stream</p>
+                    <div className="text-left bg-gray-800 p-4 rounded text-sm">
+                      <p className="font-semibold mb-2">Troubleshooting:</p>
+                      <ul className="space-y-1 text-gray-300">
+                        <li>• Check Python API is running (port 5000)</li>
+                        <li>• Verify camera is online and accessible</li>
+                        <li>• Check browser console for errors</li>
+                        <li>• Ensure mysql-connector-python is installed</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Camera:</span>
+                    <span className="ml-2 font-medium">{streamingCamera.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Classroom:</span>
+                    <span className="ml-2 font-medium">{streamingCamera.classroom_name}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">IP Address:</span>
+                    <span className="ml-2 font-mono">{streamingCamera.ip_address}:{streamingCamera.port}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Status:</span>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${getStatusColor(streamingCamera.status)}`}>
+                      {streamingCamera.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-2">
+              <button
+                onClick={closeStream}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

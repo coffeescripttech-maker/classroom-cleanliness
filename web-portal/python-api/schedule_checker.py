@@ -55,6 +55,8 @@ def get_active_schedules():
         current_time = now.strftime('%H:%M:00')
         current_day = str(now.isoweekday())  # 1=Monday, 7=Sunday
         
+        # Calculate time for pre-capture alarm (subtract pre_capture_delay from capture_time)
+        # We need to check schedules that should trigger alarm now
         query = """
             SELECT 
                 s.id,
@@ -75,7 +77,14 @@ def get_active_schedules():
                 cl.id as classroom_id,
                 cl.name as classroom_name,
                 gl.name as grade_level,
-                sec.name as section_name
+                sec.name as section_name,
+                TIME_FORMAT(
+                    SUBTIME(
+                        s.capture_time, 
+                        SEC_TO_TIME(s.pre_capture_delay_seconds + s.alarm_duration_seconds)
+                    ),
+                    '%H:%i:00'
+                ) as alarm_time
             FROM capture_schedules s
             JOIN cameras c ON s.camera_id = c.id
             JOIN classrooms cl ON c.classroom_id = cl.id
@@ -83,7 +92,7 @@ def get_active_schedules():
             JOIN grade_levels gl ON sec.grade_level_id = gl.id
             WHERE s.active = TRUE
             AND c.status = 'active'
-            AND s.capture_time = %s
+            HAVING alarm_time = %s
         """
         
         cursor.execute(query, (current_time,))
@@ -104,11 +113,59 @@ def get_active_schedules():
 
 
 def play_alarm(duration_seconds):
-    """Play alarm sound (placeholder - implement based on your system)"""
+    """Play custom alarm sound from WAV file"""
     log_message(f"🔔 Playing alarm for {duration_seconds} seconds")
-    # TODO: Implement actual alarm sound playback
-    # For now, just wait
-    time_module.sleep(duration_seconds)
+    
+    # Path to alarm sound file
+    alarm_file = Path(__file__).parent.parent / 'public' / 'alarm1.wav'
+    
+    try:
+        # Try pygame first (best for audio)
+        try:
+            import pygame
+            pygame.mixer.init()
+            pygame.mixer.music.load(str(alarm_file))
+            
+            # Calculate how many times to loop
+            # Get duration of the sound file (approximate)
+            sound = pygame.mixer.Sound(str(alarm_file))
+            sound_duration = sound.get_length()
+            loops = int(duration_seconds / sound_duration)
+            
+            log_message(f"🔊 Playing {alarm_file.name} ({loops} times)")
+            
+            # Play the sound repeatedly
+            for i in range(loops):
+                pygame.mixer.music.play()
+                while pygame.mixer.music.get_busy():
+                    time_module.sleep(0.1)
+            
+            pygame.mixer.quit()
+            return
+            
+        except ImportError:
+            log_message("⚠️  pygame not installed, trying winsound...", 'WARNING')
+        
+        # Fallback to winsound (Windows beep)
+        import winsound
+        if alarm_file.exists():
+            # Play WAV file with winsound
+            log_message(f"🔊 Playing {alarm_file.name} with winsound")
+            winsound.PlaySound(str(alarm_file), winsound.SND_FILENAME)
+        else:
+            # File not found, use system beep
+            log_message(f"⚠️  Alarm file not found: {alarm_file}", 'WARNING')
+            log_message("🔔 Using system beep instead")
+            beeps = duration_seconds * 2
+            for i in range(beeps):
+                winsound.Beep(1000, 500)
+                if i < beeps - 1:
+                    time_module.sleep(0.5)
+                    
+    except Exception as e:
+        log_message(f"⚠️  Could not play alarm sound: {e}", 'WARNING')
+        # Fallback to silent wait
+        time_module.sleep(duration_seconds)
 
 
 def capture_from_camera(schedule):
@@ -119,10 +176,16 @@ def capture_from_camera(schedule):
         
         # Generate filename
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        folder_path = UPLOAD_DIR / schedule['grade_level'] / schedule['section_name']
+        
+        # Use hyphenated folder names (no spaces)
+        grade_folder = schedule['grade_level'].replace(' ', '-')
+        section_folder = schedule['section_name'].replace(' ', '-')
+        date_folder = datetime.now().strftime('%Y-%m-%d')
+        
+        folder_path = UPLOAD_DIR / grade_folder / section_folder / date_folder
         folder_path.mkdir(parents=True, exist_ok=True)
         
-        filename = f"{timestamp}_{schedule['classroom_name'].replace(' ', '_')}.jpg"
+        filename = f"original_{datetime.now().strftime('%H-%M-%S')}.jpg"
         image_path = folder_path / filename
         
         log_message(f"📸 Capturing from camera: {schedule['camera_name']}")
@@ -131,8 +194,10 @@ def capture_from_camera(schedule):
         success = capture_frame_from_rtsp(rtsp_url, str(image_path))
         
         if success:
+            # Return path relative to uploads directory (for database storage)
+            relative_path = f"{grade_folder}/{section_folder}/{date_folder}/{filename}"
             log_message(f"✅ Image captured: {image_path}")
-            return str(image_path.relative_to(UPLOAD_DIR.parent))
+            return relative_path
         else:
             log_message(f"❌ Failed to capture from camera: {schedule['camera_name']}", 'ERROR')
             return None
@@ -222,17 +287,22 @@ def execute_schedule(schedule):
     log_message(f"🎯 Executing schedule: {schedule['name']}")
     log_message(f"   Camera: {schedule['camera_name']}")
     log_message(f"   Classroom: {schedule['classroom_name']}")
+    log_message(f"   Capture Time: {schedule['capture_time']}")
     log_message(f"{'='*60}")
     
     try:
         # Step 1: Play alarm if enabled
         if schedule['alarm_enabled']:
+            log_message(f"🔔 Playing alarm for {schedule['alarm_duration_seconds']}s")
             play_alarm(schedule['alarm_duration_seconds'])
         
-        # Step 2: Wait for pre-capture delay
+        # Step 2: Wait for pre-capture delay (students clean up)
         if schedule['pre_capture_delay_seconds'] > 0:
-            log_message(f"⏳ Waiting {schedule['pre_capture_delay_seconds']}s for cleanup...")
+            minutes = schedule['pre_capture_delay_seconds'] // 60
+            log_message(f"⏳ Waiting {schedule['pre_capture_delay_seconds']}s ({minutes} min) for cleanup...")
             time_module.sleep(schedule['pre_capture_delay_seconds'])
+        
+        log_message(f"📸 Capture time reached: {schedule['capture_time']}")
         
         # Step 3: Capture image
         image_path = capture_from_camera(schedule)

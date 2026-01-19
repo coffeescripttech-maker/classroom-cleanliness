@@ -284,5 +284,83 @@
     },
     "total_score": 37.285801535608485,
     "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-19T10:15:33.749248",
+    "scores": {
+      "floor": 7.67,
+      "furniture": 10,
+      "trash": 7.0,
+      "wall": 5.9,
+      "clutter": 10
+    },
+    "total_score": 40.57099228030037,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-19T10:22:53.847948",
+    "scores": {
+      "floor": 7.61,
+      "furniture": 10,
+      "trash": 7.0,
+      "wall": 5.9,
+      "clutter": 10
+    },
+    "total_score": 40.506397571783076,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-19T13:24:54.826386",
+    "scores": {
+      "floor": 7.67,
+      "furniture": 10,
+      "trash": 7.0,
+      "wall": 2.29,
+      "clutter": 10
+    },
+    "total_score": 36.95434028758167,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-19T13:35:03.842990",
+    "scores": {
+      "floor": 7.62,
+      "furniture": 10,
+      "trash": 7.0,
+      "wall": 3.54,
+      "clutter": 10
+    },
+    "total_score": 38.16663871794213,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-19T13:44:49.093320",
+    "scores": {
+      "floor": 7.64,
+      "furniture": 10,
+      "trash": 7.0,
+      "wall": 2.32,
+      "clutter": 10
+    },
+    "total_score": 36.95884765625,
+    "rating": "Good"
+  },
+  {
+    "classroom_id": "Room 101",
+    "timestamp": "2026-01-19T13:45:19.965293",
+    "scores": {
+      "floor": 7.52,
+      "furniture": 10,
+      "trash": 7.0,
+      "wall": 3.94,
+      "clutter": 10
+    },
+    "total_score": 38.457255859374996,
+    "rating": "Good"
   }
 ]

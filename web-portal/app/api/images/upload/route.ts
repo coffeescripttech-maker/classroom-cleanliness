@@ -66,10 +66,18 @@ export async function POST(request: NextRequest) {
       [classroom_id, relativePath, fileSize]
     );
 
+    const imageId = result.insertId;
+
+    // Process face detection asynchronously (don't wait for it)
+    const absolutePath = filePath;
+    processFaceDetection(imageId, absolutePath, relativePath).catch(err => {
+      console.error('Face detection error:', err);
+    });
+
     return NextResponse.json({
       success: true,
       data: {
-        id: result.insertId,
+        id: imageId,
         image_path: relativePath
       },
       message: 'Image uploaded successfully'
@@ -81,5 +89,32 @@ export async function POST(request: NextRequest) {
       { success: false, error: error.message },
       { status: 500 }
     );
+  }
+}
+
+// Process face detection in background
+async function processFaceDetection(imageId: number, imagePath: string, relativePath: string) {
+  try {
+    // Call Python API to process face detection
+    const pythonApiUrl = process.env.PYTHON_API_URL || 'http://localhost:5000';
+    
+    const response = await fetch(`${pythonApiUrl}/detect-faces`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image_id: imageId,
+        image_path: imagePath,
+        relative_path: relativePath
+      })
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log(`Face detection completed for image ${imageId}: ${result.faces_detected} faces`);
+    } else {
+      console.error(`Face detection failed for image ${imageId}`);
+    }
+  } catch (error) {
+    console.error('Face detection request failed:', error);
   }
 }

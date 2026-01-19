@@ -54,7 +54,9 @@ export default function EditSchedulePage() {
     try {
       const response = await fetch('/api/cameras');
       const result = await response.json();
-      setCameras(result.data || []);
+      // API returns array directly, not wrapped in {data: [...]}
+      const camerasData = Array.isArray(result) ? result : (result.data || []);
+      setCameras(camerasData);
     } catch (error) {
       console.error('Failed to fetch cameras:', error);
     }
@@ -282,12 +284,12 @@ export default function EditSchedulePage() {
         <div className="border-t pt-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             <Timer className="w-5 h-5 inline mr-2" />
-            Pre-Capture Delay
+            Cleanup Time (Before Capture)
           </h3>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Delay (seconds)
+              Cleanup Duration (seconds)
             </label>
             <input
               type="number"
@@ -299,8 +301,13 @@ export default function EditSchedulePage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <p className="text-sm text-gray-500 mt-1">
-              Time given to students to clean before capture ({Math.floor(formData.pre_capture_delay_seconds / 60)} minutes)
+              Time given to students to clean BEFORE capture ({Math.floor(formData.pre_capture_delay_seconds / 60)} minutes)
             </p>
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Timeline:</strong> Alarm plays {Math.floor(formData.pre_capture_delay_seconds / 60)} min before capture time
+              </p>
+            </div>
           </div>
         </div>
 

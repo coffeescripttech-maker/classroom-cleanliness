@@ -12,3 +12,4 @@ venv/
 env/
 .venv
 web-portal/node_modules/
+web-portal/.next/*
