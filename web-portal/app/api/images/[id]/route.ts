@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { getCurrentUser, canAccessClassroom, isAdmin } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const dataQuery = `
       SELECT 
         ci.*,
@@ -41,6 +51,16 @@ export async function GET(
     }
     
     const image = images[0];
+    
+    // Check access permission
+    const hasAccess = await canAccessClassroom(user, image.classroom_id);
+    if (!hasAccess) {
+      return NextResponse.json(
+        { success: false, error: 'Access denied' },
+        { status: 403 }
+      );
+    }
+    
     const result = {
       ...image,
       score: image.total_score ? {
@@ -72,6 +92,15 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Only admin can delete
+    const user = await getCurrentUser();
+    if (!isAdmin(user)) {
+      return NextResponse.json(
+        { success: false, error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+    
     await query('DELETE FROM captured_images WHERE id = ?', [params.id]);
     return NextResponse.json({ success: true, message: 'Image deleted' });
   } catch (error: any) {

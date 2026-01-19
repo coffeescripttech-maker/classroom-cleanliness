@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { getCurrentUser, isAdmin } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -13,9 +23,24 @@ export async function GET(request: NextRequest) {
     let whereConditions = [];
     let params: any[] = [];
     
+    // Filter by classroom_id if provided
     if (classroom_id) {
       whereConditions.push('ci.classroom_id = ?');
       params.push(classroom_id);
+    }
+    
+    // Class presidents can only see their own classroom
+    if (user.role === 'class_president' && user.classroom_id) {
+      whereConditions.push('ci.classroom_id = ?');
+      params.push(user.classroom_id);
+    }
+    
+    // Students cannot access images
+    if (user.role === 'student') {
+      return NextResponse.json(
+        { success: false, error: 'Access denied' },
+        { status: 403 }
+      );
     }
     
     const whereClause = whereConditions.length > 0 

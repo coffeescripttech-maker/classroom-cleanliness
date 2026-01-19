@@ -117,7 +117,9 @@ export default function ReportsPage() {
             <div className="flex items-center gap-3">
               <Target className="w-8 h-8 text-green-600" />
               <div>
-                <div className="text-2xl font-bold text-gray-900">{statistics.averageScore.toFixed(1)}</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {statistics.averageScore ? Number(statistics.averageScore).toFixed(1) : '0.0'}
+                </div>
                 <div className="text-sm text-gray-600">Average Score</div>
               </div>
             </div>
@@ -168,7 +170,7 @@ export default function ReportsPage() {
         <MetricsBreakdownChart timeRange={timeRange} gradeLevel={selectedGrade} />
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+      {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="text-lg font-bold text-blue-900 mb-3">📊 Key Insights</h3>
         <ul className="space-y-2 text-blue-800">
           <li>• Average scores have improved by {statistics?.improvementRate.toFixed(1)}% over the selected period</li>
@@ -176,7 +178,7 @@ export default function ReportsPage() {
           <li>• Floor cleanliness shows the most improvement across all classrooms</li>
           <li>• Consider focusing on wall/board maintenance for lower-scoring classrooms</li>
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 }

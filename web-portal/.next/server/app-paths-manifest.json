@@ -1,12 +1,16 @@
 {
-  "/api/images/analyze/route": "app/api/images/analyze/route.js",
-  "/api/cameras/route": "app/api/cameras/route.js",
-  "/api/images/route": "app/api/images/route.js",
   "/api/classrooms/route": "app/api/classrooms/route.js",
-  "/api/images/[id]/route": "app/api/images/[id]/route.js",
-  "/dashboard/schedules/page": "app/dashboard/schedules/page.js",
-  "/dashboard/schedules/[id]/edit/page": "app/dashboard/schedules/[id]/edit/page.js",
-  "/dashboard/cameras/page": "app/dashboard/cameras/page.js",
+  "/api/images/route": "app/api/images/route.js",
+  "/api/dashboard/stats/route": "app/api/dashboard/stats/route.js",
+  "/api/scores/leaderboard/route": "app/api/scores/leaderboard/route.js",
+  "/api/auth/logout/route": "app/api/auth/logout/route.js",
+  "/login/page": "app/login/page.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/auth/me/route": "app/api/auth/me/route.js",
+  "/api/leaderboard/route": "app/api/leaderboard/route.js",
   "/dashboard/images/page": "app/dashboard/images/page.js",
-  "/dashboard/images/[id]/page": "app/dashboard/images/[id]/page.js"
+  "/dashboard/reports/page": "app/dashboard/reports/page.js",
+  "/dashboard/classrooms/page": "app/dashboard/classrooms/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/leaderboard/page": "app/dashboard/leaderboard/page.js"
 }

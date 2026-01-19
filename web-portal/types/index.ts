@@ -129,12 +129,13 @@ export interface ImageComparison {
 export interface User {
   id: number;
   username: string;
-  email: string;
+  email: string | null;
   password_hash: string;
-  role: 'admin' | 'teacher' | 'viewer';
-  full_name?: string;
+  role: 'admin' | 'class_president' | 'student';
+  classroom_id: number | null;
+  full_name: string;
   active: boolean;
-  last_login?: Date;
+  last_login: Date | null;
   created_at: Date;
   updated_at: Date;
 }

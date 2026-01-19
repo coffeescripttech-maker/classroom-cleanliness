@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { Classroom, ApiResponse, PaginatedResponse } from '@/types';
+import { getCurrentUser, isAdmin } from '@/lib/auth';
 
 // GET /api/classrooms - List all classrooms
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -31,6 +41,20 @@ export async function GET(request: NextRequest) {
     if (active !== null && active !== undefined) {
       whereConditions.push('c.active = ?');
       params.push(active === 'true' ? 1 : 0);
+    }
+    
+    // Class presidents can only see their own classroom
+    if (user.role === 'class_president' && user.classroom_id) {
+      whereConditions.push('c.id = ?');
+      params.push(user.classroom_id);
+    }
+    
+    // Students cannot access classroom details
+    if (user.role === 'student') {
+      return NextResponse.json(
+        { success: false, error: 'Access denied' },
+        { status: 403 }
+      );
     }
     
     const whereClause = whereConditions.length > 0 
@@ -91,6 +115,15 @@ export async function GET(request: NextRequest) {
 // POST /api/classrooms - Create new classroom
 export async function POST(request: NextRequest) {
   try {
+    // Only admin can create classrooms
+    const user = await getCurrentUser();
+    if (!isAdmin(user)) {
+      return NextResponse.json(
+        { success: false, error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+    
     const body = await request.json();
     const { section_id, name, building, floor, capacity, active } = body;
     
