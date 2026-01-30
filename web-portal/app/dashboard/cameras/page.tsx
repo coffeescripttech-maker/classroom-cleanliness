@@ -167,13 +167,22 @@ export default function CamerasPage() {
           <h1 className="text-3xl font-bold text-gray-900">Camera Management</h1>
           <p className="text-gray-600 mt-1">Manage cameras for automated classroom monitoring</p>
         </div>
-        <Link
-          href="/dashboard/cameras/create"
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          <Plus className="w-5 h-5" />
-          Add Camera
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/cameras/monitor"
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+          >
+            <Play className="w-5 h-5" />
+            Live Monitor
+          </Link>
+          <Link
+            href="/dashboard/cameras/create"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="w-5 h-5" />
+            Add Camera
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

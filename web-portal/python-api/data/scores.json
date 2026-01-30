@@ -362,5 +362,18 @@
     },
     "total_score": 38.457255859374996,
     "rating": "Good"
+  },
+  {
+    "classroom_id": "Grade 10 - Reliable",
+    "timestamp": "2026-01-30T13:42:41.288469",
+    "scores": {
+      "floor": 7.7,
+      "furniture": 8.52,
+      "trash": 7.0,
+      "wall": 4.73,
+      "clutter": 10
+    },
+    "total_score": 37.95229840289939,
+    "rating": "Good"
   }
 ]
